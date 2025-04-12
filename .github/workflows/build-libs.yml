@@ -21,20 +21,20 @@ jobs:
         mkdir -p build
         cp *.c *.h win32/Makefile.msc build/
         
-    - name: Build Release Static Lib
+    - name: Build Release Static Lib (/MD)
       shell: cmd
       working-directory: ./build
       run: |
         nmake -f Makefile.msc clean
-        nmake -f Makefile.msc zlib.lib
+        nmake -f Makefile.msc CFLAGS="-nologo -MD -O2 -W3 -GS-" zlib.lib
         if exist zlib.lib ren zlib.lib zlib-1.2.13_2019_64.lib
         
-    - name: Build Debug Static Lib
+    - name: Build Debug Static Lib (/MDd)
       shell: cmd
       working-directory: ./build
       run: |
         nmake -f Makefile.msc clean
-        nmake -f Makefile.msc DEBUG=1 zlib.lib
+        nmake -f Makefile.msc CFLAGS="-nologo -MDd -Od -W3 -GS-" DEBUG=1 zlib.lib
         if exist zlib.lib ren zlib.lib zlib-1.2.13_2019_64d.lib
         
     - name: Verify static libs
@@ -43,6 +43,8 @@ jobs:
       run: |
         dumpbin /HEADERS zlib-1.2.13_2019_64.lib | find "machine"
         dumpbin /HEADERS zlib-1.2.13_2019_64d.lib | find "machine"
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | find "Runtime"
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | find "Runtime"
         dir *.lib
         if not exist zlib-1.2.13_2019_64.lib exit 1
         if not exist zlib-1.2.13_2019_64d.lib exit 1
@@ -50,7 +52,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: zlib-static-libs
+        name: zlib-static-libs-md
         path: |
           build/zlib-1.2.13_2019_64.lib
           build/zlib-1.2.13_2019_64d.lib
