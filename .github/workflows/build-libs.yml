@@ -49,11 +49,11 @@ jobs:
       working-directory: ./build
       run: |
         msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64
-        if not exist Debug\zlibstatic.lib (
-          echo ERROR: Debug\zlibstatic.lib not found!
+        if not exist Debug\zlibstaticd.lib (
+          echo ERROR: Debug\zlibstaticd.lib not found!
           exit 1
         )
-        copy Debug\zlibstatic.lib zlib-1.2.13_2019_64d.lib
+        copy Debug\zlibstaticd.lib zlib-1.2.13_2019_64d.lib
 
     - name: Verify static libs
       shell: cmd
