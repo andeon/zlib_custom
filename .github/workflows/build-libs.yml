@@ -3,7 +3,7 @@ name: Build zlib 1.2.13 Static Libs for OpenToonz
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: '**'
 
 jobs:
   build:
