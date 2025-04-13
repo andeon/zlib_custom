@@ -14,42 +14,35 @@ jobs:
       with:
         submodules: 'true'
 
-    - name: List files in the directory
-      run: dir contrib\vstudio\vc14
-
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Build Release Static Lib (/MD)
+    - name: Build Static Libraries
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration="Release Without ASM" /p:Platform=x64 /p:PlatformToolset=v142
-        if not exist x64\ZlibStatRelease\zlibstatic.lib (
-          echo ERROR: zlibstatic.lib not found!
-          echo Checking alternative locations...
+        # Build Release version
+        msbuild zlibstat.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
+        if not exist x64\Release\zlibstatic.lib (
+          echo Checking for alternative output paths...
           dir x64\ /s
           exit 1
         )
-        copy x64\ZlibStatRelease\zlibstatic.lib ..\..\..\zlib-1.2.13_2019_64.lib
+        copy x64\Release\zlibstatic.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
-    - name: Build Debug Static Lib (/MDd)
-      shell: cmd
-      working-directory: contrib\vstudio\vc14
-      run: |
-        msbuild zlibvc.sln /p:Configuration="Debug Without ASM" /p:Platform=x64 /p:PlatformToolset=v142
-        if not exist x64\ZlibStatDebug\zlibstaticd.lib (
-          echo ERROR: zlibstaticd.lib not found!
-          echo Checking alternative locations...
+        # Build Debug version
+        msbuild zlibstat.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
+        if not exist x64\Debug\zlibstaticd.lib (
+          echo Checking for alternative output paths...
           dir x64\ /s
           exit 1
         )
-        copy x64\ZlibStatDebug\zlibstaticd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
+        copy x64\Debug\zlibstaticd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
 
-    - name: Upload static libs
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: zlib-static-libs-md
+        name: zlib-static-libs
         path: |
           zlib-1.2.13_2019_64.lib
           zlib-1.2.13_2019_64d.lib
