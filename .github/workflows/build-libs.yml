@@ -60,10 +60,10 @@ jobs:
       working-directory: ./build
       run: |
         dir *.lib
-        dumpbin /HEADERS zlib-1.2.13_2019_64.lib | find "machine"
-        dumpbin /HEADERS zlib-1.2.13_2019_64d.lib | find "machine"
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | find "Runtime"
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | find "Runtime"
+        dumpbin /HEADERS zlib-1.2.13_2019_64.lib | findstr /C:"machine (x64)" >nul || exit 1
+        dumpbin /HEADERS zlib-1.2.13_2019_64d.lib | findstr /C:"machine (x64)" >nul || exit 1
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | findstr Runtime >nul || exit 1
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | findstr Runtime >nul || exit 1
         if not exist zlib-1.2.13_2019_64.lib exit 1
         if not exist zlib-1.2.13_2019_64d.lib exit 1
 
