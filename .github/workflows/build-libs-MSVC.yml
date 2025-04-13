@@ -12,9 +12,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Passo 1: Setup MSVC e SDK
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
+    # Passo 2: Retarget a solução para v142 (Visual Studio 2019) e SDK mais recente (Windows 10 SDK)
+    - name: Retarget Solution to v142
+      run: |
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
+
+    # Passo 3: Build Release Static Lib (/MD)
     - name: Build Release Static Lib (/MD)
       shell: cmd
       working-directory: contrib\vstudio\vc14
@@ -26,6 +34,7 @@ jobs:
         )
         copy x64\ZlibStatRelease\zlibstatic.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
+    # Passo 4: Build Debug Static Lib (/MDd)
     - name: Build Debug Static Lib (/MDd)
       shell: cmd
       working-directory: contrib\vstudio\vc14
@@ -37,7 +46,7 @@ jobs:
         )
         copy x64\ZlibStatDebug\zlibstaticd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
 
-
+    # Passo 5: Upload dos arquivos gerados
     - name: Upload static libs
       uses: actions/upload-artifact@v4
       with:
