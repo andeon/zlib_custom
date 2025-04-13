@@ -12,47 +12,51 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: 'true'
+        submodules: 'true'  # Garantir que submódulos sejam baixados, se existirem.
 
+    # Passo 1: Verificar arquivos no diretório
+    - name: List files in the directory
+      run: dir contrib\vstudio\vc14  # Verificar se o arquivo zlibvc.sln está no diretório correto.
+
+    # Passo 2: Setup MSVC
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Build Static Libraries
+    # Passo 3: Retarget Solution para v142 (Visual Studio 2019)
+    - name: Retarget Solution to v142
+      run: |
+        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
+        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
+
+    # Passo 4: Build Release Static Lib (/MD)
+    - name: Build Release Static Lib (/MD)
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        # Clean previous builds
-        msbuild zlibstat.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /t:Clean
-        msbuild zlibstat.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /t:Clean
-
-        # Build Release version
-        msbuild zlibstat.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
-        
-        # Verify and copy release library
-        echo "Checking for static library..."
+        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Release /p:Platform=x64
         if not exist x64\ZlibStatRelease\zlibstat.lib (
-          echo "ERROR: zlibstat.lib not found in x64\ZlibStatRelease!"
-          dir x64\ZlibStatRelease
+          echo ERROR: zlibstatic.lib not found!
           exit 1
         )
         copy x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
-        # Build Debug version
-        msbuild zlibstat.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
-        
-        # Verify and copy debug library (note: filename is zlibstat.lib even in debug)
-        echo "Checking for debug static library..."
+    # Passo 5: Build Debug Static Lib (/MDd)
+    - name: Build Debug Static Lib (/MDd)
+      shell: cmd
+      working-directory: contrib\vstudio\vc14
+      run: |
+        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Debug /p:Platform=x64
         if not exist x64\ZlibStatDebug\zlibstat.lib (
-          echo "ERROR: zlibstat.lib not found in x64\ZlibStatDebug!"
-          dir x64\ZlibStatDebug
+          echo ERROR: zlibstat.lib not found!
           exit 1
         )
         copy x64\ZlibStatDebug\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64d.lib
 
-    - name: Upload artifacts
+    # Passo 6: Upload dos arquivos gerados
+    - name: Upload static libs
       uses: actions/upload-artifact@v4
       with:
-        name: zlib-static-libs
+        name: zlib-static-libs-md
         path: |
           zlib-1.2.13_2019_64.lib
           zlib-1.2.13_2019_64d.lib
