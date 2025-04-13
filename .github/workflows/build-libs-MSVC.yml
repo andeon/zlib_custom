@@ -23,26 +23,34 @@ jobs:
       run: |
         # Build Release version
         msbuild zlibstat.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
-        if not exist x64\Release\zlibstatic.lib (
-          echo Checking for alternative output paths...
+        
+        # Check for output in ZlibStatRelease directory
+        if not exist x64\ZlibStatRelease\zlibstatic.lib (
+          echo ERROR: zlibstatic.lib not found in ZlibStatRelease!
           dir x64\ /s
           exit 1
         )
-        copy x64\Release\zlibstatic.lib ..\..\..\zlib-1.2.13_2019_64.lib
+        copy x64\ZlibStatRelease\zlibstatic.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
         # Build Debug version
         msbuild zlibstat.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
-        if not exist x64\Debug\zlibstaticd.lib (
-          echo Checking for alternative output paths...
+        
+        # Check for output in ZlibStatDebug directory
+        if not exist x64\ZlibStatDebug\zlibstaticd.lib (
+          echo ERROR: zlibstaticd.lib not found in ZlibStatDebug!
           dir x64\ /s
           exit 1
         )
-        copy x64\Debug\zlibstaticd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
+        copy x64\ZlibStatDebug\zlibstaticd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: zlib-static-libs
+        path: |
+          zlib-1.2.13_2019_64.lib
+          zlib-1.2.13_2019_64d.lib
+        retention-days: 5
         path: |
           zlib-1.2.13_2019_64.lib
           zlib-1.2.13_2019_64d.lib
