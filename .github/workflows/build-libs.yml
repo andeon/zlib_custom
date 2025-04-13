@@ -10,42 +10,40 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Install modern CMake
-      uses: jwlawson/actions-setup-cmake@v2
-      with:
-        cmake-version: '3.27.7'
+    - name: Install CMake
+      uses: jwlawson/actions-setup-cmake@v1  # versão leve e confiável
 
-    - name: Check CMake version
-      run: cmake --version
-
-    - name: Prepare build environment
+    - name: Configure CMake project
       shell: bash
-      run: |
-        mkdir -p build
-
-    - name: Generate Visual Studio project with CMake
       run: |
         cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -DZLIB_BUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=OFF
 
-    - name: Build Release Static Lib (/MD) using MSBuild
+    - name: Build Release Static Lib (/MD)
       shell: cmd
       working-directory: ./build
       run: |
         msbuild zlib.sln /p:Configuration=Release /p:Platform=x64
-        if exist Release\zlibstatic.lib copy Release\zlibstatic.lib zlib-1.2.13_2019_64.lib
+        if not exist Release\zlibstatic.lib (
+          echo ERROR: Release\zlibstatic.lib not found!
+          exit 1
+        )
+        copy Release\zlibstatic.lib zlib-1.2.13_2019_64.lib
 
-    - name: Build Debug Static Lib (/MDd) using MSBuild
+    - name: Build Debug Static Lib (/MDd)
       shell: cmd
       working-directory: ./build
       run: |
         msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64
-        if exist Debug\zlibstatic.lib copy Debug\zlibstatic.lib zlib-1.2.13_2019_64d.lib
+        if not exist Debug\zlibstatic.lib (
+          echo ERROR: Debug\zlibstatic.lib not found!
+          exit 1
+        )
+        copy Debug\zlibstatic.lib zlib-1.2.13_2019_64d.lib
 
     - name: Verify static libs
       shell: cmd
