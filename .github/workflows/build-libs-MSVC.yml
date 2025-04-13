@@ -24,18 +24,19 @@ jobs:
 
     # Passo 3: Retarget Solution para v142 (Visual Studio 2019)
     - name: Retarget Solution to v142
+      working-directory: contrib\vstudio\vc14
       run: |
-        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
-        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
 
     # Passo 4: Build Release Static Lib (/MD)
     - name: Build Release Static Lib (/MD)
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Release /p:Platform=x64
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64
         if not exist x64\ZlibStatRelease\zlibstat.lib (
-          echo ERROR: zlibstatic.lib not found!
+          echo ERROR: zlibstat.lib not found!
           exit 1
         )
         copy x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
@@ -45,7 +46,7 @@ jobs:
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild contrib\vstudio\vc14\zlibvc.sln /p:Configuration=Debug /p:Platform=x64
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64
         if not exist x64\ZlibStatDebug\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
