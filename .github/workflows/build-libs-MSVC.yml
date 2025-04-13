@@ -28,14 +28,11 @@ jobs:
         # Build Release version
         msbuild zlibstat.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
         
-        # Verify the exact lib file path
+        # Verify and copy release library
         echo "Checking for static library..."
         if not exist x64\ZlibStatRelease\zlibstat.lib (
           echo "ERROR: zlibstat.lib not found in x64\ZlibStatRelease!"
-          echo "Contents of x64\ZlibStatRelease:"
           dir x64\ZlibStatRelease
-          echo "Contents of x64:"
-          dir x64
           exit 1
         )
         copy x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
@@ -43,17 +40,14 @@ jobs:
         # Build Debug version
         msbuild zlibstat.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
         
-        # Verify the exact debug lib file path
+        # Verify and copy debug library (note: filename is zlibstat.lib even in debug)
         echo "Checking for debug static library..."
-        if not exist x64\ZlibStatDebug\zlibstatd.lib (
-          echo "ERROR: zlibstatd.lib not found in x64\ZlibStatDebug!"
-          echo "Contents of x64\ZlibStatDebug:"
+        if not exist x64\ZlibStatDebug\zlibstat.lib (
+          echo "ERROR: zlibstat.lib not found in x64\ZlibStatDebug!"
           dir x64\ZlibStatDebug
-          echo "Contents of x64:"
-          dir x64
           exit 1
         )
-        copy x64\ZlibStatDebug\zlibstatd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
+        copy x64\ZlibStatDebug\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64d.lib
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
