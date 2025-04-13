@@ -10,50 +10,38 @@ jobs:
     runs-on: windows-2019
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Install CMake
-      uses: actions/setup-cmake@v3
+      uses: jwlawson/actions-setup-cmake@v2.0.2
 
-    - name: Prepare build environment
-      shell: bash
-      run: |
-        mkdir -p build
-        cp *.c *.h win32/Makefile.msc build/
-        
     - name: Generate Visual Studio project with CMake
-      shell: bash
       run: |
-        cmake -G "Visual Studio 16 2019" -A x64 -S . -B build
+        cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -DZLIB_BUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=OFF
 
-    - name: Build Release Static Lib (/MD) using MSBuild
-      shell: cmd
-      working-directory: ./build
+    - name: Build Release Static Lib (/MD)
       run: |
-        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64
-        if exist zlib.lib ren zlib.lib zlib-1.2.13_2019_64.lib
-        
-    - name: Build Debug Static Lib (/MDd) using MSBuild
-      shell: cmd
-      working-directory: ./build
+        cmake --build build --config Release
+        if exist build\Release\zlibstatic.lib ren build\Release\zlibstatic.lib zlib-1.2.13_2019_64.lib
+
+    - name: Build Debug Static Lib (/MDd)
       run: |
-        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64
-        if exist zlib.lib ren zlib.lib zlib-1.2.13_2019_64d.lib
-        
+        cmake --build build --config Debug
+        if exist build\Debug\zlibstatic.lib ren build\Debug\zlibstatic.lib zlib-1.2.13_2019_64d.lib
+
     - name: Verify static libs
-      shell: cmd
-      working-directory: ./build
       run: |
-        dumpbin /HEADERS zlib-1.2.13_2019_64.lib | find "machine"
-        dumpbin /HEADERS zlib-1.2.13_2019_64d.lib | find "machine"
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | find "Runtime"
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | find "Runtime"
-        dir *.lib
-        if not exist zlib-1.2.13_2019_64.lib exit 1
-        if not exist zlib-1.2.13_2019_64d.lib exit 1
+        dumpbin /HEADERS build\zlib-1.2.13_2019_64.lib | find "machine"
+        dumpbin /HEADERS build\zlib-1.2.13_2019_64d.lib | find "machine"
+        dumpbin /DIRECTIVES build\zlib-1.2.13_2019_64.lib | find "Runtime"
+        dumpbin /DIRECTIVES build\zlib-1.2.13_2019_64d.lib | find "Runtime"
+        dir build\*.lib
+        if not exist build\zlib-1.2.13_2019_64.lib exit 1
+        if not exist build\zlib-1.2.13_2019_64d.lib exit 1
 
     - name: Upload static libs
       uses: actions/upload-artifact@v4
@@ -64,11 +52,12 @@ jobs:
           build/zlib-1.2.13_2019_64d.lib
         retention-days: 5
 
-    - name: Upload zlib solution and project files
+    - name: Upload Visual Studio project files
       uses: actions/upload-artifact@v4
       with:
-        name: zlib-project-files
+        name: zlib-vs-project
         path: |
-          build/zlib.sln
-          build/zlib.vcxproj
+          build/*.sln
+          build/*.vcxproj
+          build/*.vcxproj.filters
         retention-days: 5
