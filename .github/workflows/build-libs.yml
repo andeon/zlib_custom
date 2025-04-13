@@ -31,7 +31,10 @@ jobs:
     - name: Configure CMake project
       shell: bash
       run: |
-        cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -DZLIB_BUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=OFF
+        cmake -S . -B build -G "Visual Studio 16 2019" -A x64 ^
+          -DZLIB_BUILD_EXAMPLES=OFF ^
+          -DBUILD_SHARED_LIBS=OFF ^
+          -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
 
     - name: Build Release Static Lib (/MD)
       shell: cmd
@@ -60,10 +63,10 @@ jobs:
       working-directory: ./build
       run: |
         dir *.lib
-        dumpbin /HEADERS zlib-1.2.13_2019_64.lib | findstr /C:"machine (x64)" >nul || exit 1
-        dumpbin /HEADERS zlib-1.2.13_2019_64d.lib | findstr /C:"machine (x64)" >nul || exit 1
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | findstr Runtime >nul || exit 1
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | findstr Runtime >nul || exit 1
+        dumpbin /HEADERS zlib-1.2.13_2019_64.lib | findstr /C:"machine (x64)" >nul || (echo "ERROR: Not x64 Release lib" && exit 1)
+        dumpbin /HEADERS zlib-1.2.13_2019_64d.lib | findstr /C:"machine (x64)" >nul || (echo "ERROR: Not x64 Debug lib" && exit 1)
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | findstr /i "MD DLL" >nul || (echo "ERROR: Release lib not /MD" && exit 1)
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | findstr /i "MDd DLL" >nul || (echo "ERROR: Debug lib not /MDd" && exit 1)
         if not exist zlib-1.2.13_2019_64.lib exit 1
         if not exist zlib-1.2.13_2019_64d.lib exit 1
 
