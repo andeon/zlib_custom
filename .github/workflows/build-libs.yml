@@ -3,7 +3,7 @@ name: Build zlib 1.2.13 Static Libs for OpenToonz
 on:
   workflow_dispatch:
   push:
-    branches: '**'
+    branches: [ main ]
 
 jobs:
   build:
@@ -23,6 +23,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       run: |
+        # Force static lib with MD runtime
         cmake -S . -B build -G "Visual Studio 16 2019" -A x64 \
           -DZLIB_BUILD_EXAMPLES=OFF \
           -DBUILD_SHARED_LIBS=OFF \
@@ -33,9 +34,10 @@ jobs:
       shell: cmd
       working-directory: ./build
       run: |
+        # Explicitly set runtime library in MSBuild
         msbuild zlib.sln /p:Configuration=Release /p:Platform=x64 /p:RuntimeLibrary=MultiThreadedDLL
         if not exist Release\zlibstatic.lib (
-          echo ERROR: Release lib not found!
+          echo ERROR: Release static lib not found!
           exit 1
         )
         copy Release\zlibstatic.lib zlib-1.2.13_2019_64_MD.lib
@@ -44,25 +46,32 @@ jobs:
       shell: cmd
       working-directory: ./build
       run: |
+        # Explicitly set debug runtime library
         msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64 /p:RuntimeLibrary=MultiThreadedDebugDLL
         if not exist Debug\zlibstaticd.lib (
-          echo ERROR: Debug lib not found!
+          echo ERROR: Debug static lib not found!
           exit 1
         )
         copy Debug\zlibstaticd.lib zlib-1.2.13_2019_64_MDd.lib
 
-    - name: Verify Build
+    - name: Verify Runtime Linkage
       shell: cmd
       working-directory: ./build
       run: |
+        echo Verifying Release lib...
         dumpbin /DIRECTIVES zlib-1.2.13_2019_64_MD.lib | findstr /i "DLL" || (
           echo ERROR: Release lib not built with /MD!
+          dumpbin /DIRECTIVES zlib-1.2.13_2019_64_MD.lib | findstr /i "Runtime"
           exit 1
         )
+
+        echo Verifying Debug lib...
         dumpbin /DIRECTIVES zlib-1.2.13_2019_64_MDd.lib | findstr /i "DebugDLL" || (
           echo ERROR: Debug lib not built with /MDd!
+          dumpbin /DIRECTIVES zlib-1.2.13_2019_64_MDd.lib | findstr /i "Runtime"
           exit 1
         )
+
         echo Both libraries verified with correct DLL runtime linkage
 
     - name: Upload Artifacts
