@@ -51,7 +51,3 @@ jobs:
           zlib-1.2.13_2019_64.lib
           zlib-1.2.13_2019_64d.lib
         retention-days: 5
-        path: |
-          zlib-1.2.13_2019_64.lib
-          zlib-1.2.13_2019_64d.lib
-        retention-days: 5
