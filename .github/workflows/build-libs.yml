@@ -1,6 +1,6 @@
 name: Build zlib 1.2.13 Static Libs for OpenToonz
 
-on: 
+on:
   workflow_dispatch:
   push:
     branches: '**'
@@ -15,12 +15,20 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
+    - name: Install CMake
+      uses: actions/setup-cmake@v3
+
     - name: Prepare build environment
       shell: bash
       run: |
         mkdir -p build
-        cp *.c *.h win32/Makefile.msc win32/zlib.sln win32/zlib.vcxproj build/
+        cp *.c *.h win32/Makefile.msc build/
         
+    - name: Generate Visual Studio project with CMake
+      shell: bash
+      run: |
+        cmake -G "Visual Studio 16 2019" -A x64 -S . -B build
+
     - name: Build Release Static Lib (/MD) using MSBuild
       shell: cmd
       working-directory: ./build
