@@ -21,27 +21,39 @@ jobs:
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
+        # Clean previous builds
+        msbuild zlibstat.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /t:Clean
+        msbuild zlibstat.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /t:Clean
+
         # Build Release version
         msbuild zlibstat.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
         
-        # Check for output in ZlibStatRelease directory
-        if not exist x64\ZlibStatRelease\zlibstatic.lib (
-          echo ERROR: zlibstatic.lib not found in ZlibStatRelease!
-          dir x64\ /s
+        # Verify the exact lib file path
+        echo "Checking for static library..."
+        if not exist x64\ZlibStatRelease\zlibstat.lib (
+          echo "ERROR: zlibstat.lib not found in x64\ZlibStatRelease!"
+          echo "Contents of x64\ZlibStatRelease:"
+          dir x64\ZlibStatRelease
+          echo "Contents of x64:"
+          dir x64
           exit 1
         )
-        copy x64\ZlibStatRelease\zlibstatic.lib ..\..\..\zlib-1.2.13_2019_64.lib
+        copy x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
         # Build Debug version
         msbuild zlibstat.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
         
-        # Check for output in ZlibStatDebug directory
-        if not exist x64\ZlibStatDebug\zlibstaticd.lib (
-          echo ERROR: zlibstaticd.lib not found in ZlibStatDebug!
-          dir x64\ /s
+        # Verify the exact debug lib file path
+        echo "Checking for debug static library..."
+        if not exist x64\ZlibStatDebug\zlibstatd.lib (
+          echo "ERROR: zlibstatd.lib not found in x64\ZlibStatDebug!"
+          echo "Contents of x64\ZlibStatDebug:"
+          dir x64\ZlibStatDebug
+          echo "Contents of x64:"
+          dir x64
           exit 1
         )
-        copy x64\ZlibStatDebug\zlibstaticd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
+        copy x64\ZlibStatDebug\zlibstatd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
