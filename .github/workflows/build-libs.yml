@@ -19,22 +19,20 @@ jobs:
       shell: bash
       run: |
         mkdir -p build
-        cp *.c *.h win32/Makefile.msc build/
+        cp *.c *.h win32/Makefile.msc win32/zlib.sln win32/zlib.vcxproj build/
         
-    - name: Build Release Static Lib (/MD)
+    - name: Build Release Static Lib (/MD) using MSBuild
       shell: cmd
       working-directory: ./build
       run: |
-        nmake -f Makefile.msc clean
-        nmake -f Makefile.msc CFLAGS="-nologo -MD -O2 -W3 -GS-" zlib.lib
+        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64
         if exist zlib.lib ren zlib.lib zlib-1.2.13_2019_64.lib
         
-    - name: Build Debug Static Lib (/MDd)
+    - name: Build Debug Static Lib (/MDd) using MSBuild
       shell: cmd
       working-directory: ./build
       run: |
-        nmake -f Makefile.msc clean
-        nmake -f Makefile.msc CFLAGS="-nologo -MDd -Od -W3 -GS-" DEBUG=1 zlib.lib
+        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64
         if exist zlib.lib ren zlib.lib zlib-1.2.13_2019_64d.lib
         
     - name: Verify static libs
@@ -48,12 +46,21 @@ jobs:
         dir *.lib
         if not exist zlib-1.2.13_2019_64.lib exit 1
         if not exist zlib-1.2.13_2019_64d.lib exit 1
-        
-    - name: Upload artifacts
+
+    - name: Upload static libs
       uses: actions/upload-artifact@v4
       with:
         name: zlib-static-libs-md
         path: |
           build/zlib-1.2.13_2019_64.lib
           build/zlib-1.2.13_2019_64d.lib
+        retention-days: 5
+
+    - name: Upload zlib solution and project files
+      uses: actions/upload-artifact@v4
+      with:
+        name: zlib-project-files
+        path: |
+          build/zlib.sln
+          build/zlib.vcxproj
         retention-days: 5
