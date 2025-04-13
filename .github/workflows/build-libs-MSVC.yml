@@ -1,0 +1,47 @@
+name: Build zlib 1.2.13 Static Libs for OpenToonz (MSVC Direct)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: '**'
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Build Release Static Lib (/MD)
+      shell: cmd
+      working-directory: contrib\vstudio
+      run: |
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64
+        if not exist x64\ZlibStatRelease\zlibstatic.lib (
+          echo ERROR: zlibstatic.lib not found!
+          exit 1
+        )
+        copy x64\ZlibStatRelease\zlibstatic.lib ..\..\zlib-1.2.13_2019_64.lib
+
+    - name: Build Debug Static Lib (/MDd)
+      shell: cmd
+      working-directory: contrib\vstudio
+      run: |
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64
+        if not exist x64\ZlibStatDebug\zlibstaticd.lib (
+          echo ERROR: zlibstaticd.lib not found!
+          exit 1
+        )
+        copy x64\ZlibStatDebug\zlibstaticd.lib ..\..\zlib-1.2.13_2019_64d.lib
+
+    - name: Upload static libs
+      uses: actions/upload-artifact@v4
+      with:
+        name: zlib-static-libs-md
+        path: |
+          zlib-1.2.13_2019_64.lib
+          zlib-1.2.13_2019_64d.lib
+        retention-days: 5
