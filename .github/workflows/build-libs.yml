@@ -31,10 +31,7 @@ jobs:
     - name: Configure CMake project
       shell: bash
       run: |
-        cmake -S . -B build -G "Visual Studio 16 2019" -A x64 ^
-          -DZLIB_BUILD_EXAMPLES=OFF ^
-          -DBUILD_SHARED_LIBS=OFF ^
-          -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
+        cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -DZLIB_BUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
 
     - name: Build Release Static Lib (/MD)
       shell: cmd
