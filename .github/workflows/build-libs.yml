@@ -31,13 +31,29 @@ jobs:
     - name: Configure CMake project
       shell: bash
       run: |
-        cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -DZLIB_BUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
+        cmake -S . -B build -G "Visual Studio 16 2019" -A x64 \
+          -DZLIB_BUILD_EXAMPLES=OFF \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
+
+    - name: Verify RuntimeLibrary in .vcxproj
+      shell: bash
+      working-directory: ./build
+      run: |
+        if ! grep -q "MultiThreadedDLL" zlib.vcxproj; then
+          echo "ERROR: Release RuntimeLibrary not set to /MD in zlib.vcxproj!"
+          exit 1
+        fi
+        if ! grep -q "MultiThreadedDebugDLL" zlib.vcxproj; then
+          echo "ERROR: Debug RuntimeLibrary not set to /MDd in zlib.vcxproj!"
+          exit 1
+        fi
 
     - name: Build Release Static Lib (/MD)
       shell: cmd
       working-directory: ./build
       run: |
-        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64
+        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64 /p:RuntimeLibrary=MultiThreadedDLL
         if not exist Release\zlibstatic.lib (
           echo ERROR: Release\zlibstatic.lib not found!
           exit 1
@@ -48,7 +64,7 @@ jobs:
       shell: cmd
       working-directory: ./build
       run: |
-        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64
+        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64 /p:RuntimeLibrary=MultiThreadedDebugDLL
         if not exist Debug\zlibstaticd.lib (
           echo ERROR: Debug\zlibstaticd.lib not found!
           exit 1
@@ -60,10 +76,10 @@ jobs:
       working-directory: ./build
       run: |
         dir *.lib
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | findstr /i "Runtime"
+        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | findstr /i "Runtime"
         dumpbin /HEADERS zlib-1.2.13_2019_64.lib | findstr /C:"machine (x64)" >nul || (echo "ERROR: Not x64 Release lib" && exit 1)
         dumpbin /HEADERS zlib-1.2.13_2019_64d.lib | findstr /C:"machine (x64)" >nul || (echo "ERROR: Not x64 Debug lib" && exit 1)
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64.lib | findstr /i "MD DLL" >nul || (echo "ERROR: Release lib not /MD" && exit 1)
-        dumpbin /DIRECTIVES zlib-1.2.13_2019_64d.lib | findstr /i "MDd DLL" >nul || (echo "ERROR: Debug lib not /MDd" && exit 1)
         if not exist zlib-1.2.13_2019_64.lib exit 1
         if not exist zlib-1.2.13_2019_64d.lib exit 1
 
