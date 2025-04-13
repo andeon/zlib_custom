@@ -24,10 +24,11 @@ jobs:
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /t:ZlibStatRelease
+        msbuild zlibvc.sln /p:Configuration="Release Without ASM" /p:Platform=x64 /p:PlatformToolset=v142
         if not exist x64\ZlibStatRelease\zlibstatic.lib (
           echo ERROR: zlibstatic.lib not found!
-          dir x64\ZlibStatRelease /s
+          echo Checking alternative locations...
+          dir x64\ /s
           exit 1
         )
         copy x64\ZlibStatRelease\zlibstatic.lib ..\..\..\zlib-1.2.13_2019_64.lib
@@ -36,10 +37,11 @@ jobs:
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /t:ZlibStatDebug
+        msbuild zlibvc.sln /p:Configuration="Debug Without ASM" /p:Platform=x64 /p:PlatformToolset=v142
         if not exist x64\ZlibStatDebug\zlibstaticd.lib (
           echo ERROR: zlibstaticd.lib not found!
-          dir x64\ZlibStatDebug /s
+          echo Checking alternative locations...
+          dir x64\ /s
           exit 1
         )
         copy x64\ZlibStatDebug\zlibstaticd.lib ..\..\..\zlib-1.2.13_2019_64d.lib
