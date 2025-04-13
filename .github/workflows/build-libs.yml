@@ -15,8 +15,18 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Install CMake
-      uses: jwlawson/actions-setup-cmake@v1  # versão leve e confiável
+    - name: Install modern CMake
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '3.27.7'
+
+    - name: Check CMake version
+      run: cmake --version
+
+    - name: Prepare build environment
+      shell: bash
+      run: |
+        mkdir -p build
 
     - name: Configure CMake project
       shell: bash
