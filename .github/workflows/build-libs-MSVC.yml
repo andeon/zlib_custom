@@ -29,29 +29,33 @@ jobs:
         msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
         msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
 
-    # Passo 4: Build Release Static Lib (/MD)
-    - name: Build Release Static Lib (/MD)
+    # Passo 4: Build Release Static Lib (/MD, sem debug info)
+    - name: Build Release Static Lib (/MD, sem debug info)
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:EnableOptimizations=true /p:GenerateDebugInformation=false /p:DebugSymbols=false
-        if not exist x64\ZlibStatRelease\zlibstat.lib (
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 ^
+          /p:EnableOptimizations=true /p:GenerateDebugInformation=false /p:DebugSymbols=false ^
+          /p:WholeProgramOptimization=true /p:OutDir=build_output
+        if not exist build_output\x64\ZlibStatRelease\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
         )
-        copy x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
+        copy build_output\x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
     # Passo 5: Build Debug Static Lib (/MDd)
     - name: Build Debug Static Lib (/MDd)
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:EnableOptimizations=false /p:GenerateDebugInformation=true /p:DebugSymbols=true
-        if not exist x64\ZlibStatDebug\zlibstat.lib (
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 ^
+          /p:EnableOptimizations=false /p:GenerateDebugInformation=true /p:DebugSymbols=true ^
+          /p:OutDir=build_output
+        if not exist build_output\x64\ZlibStatDebug\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
         )
-        copy x64\ZlibStatDebug\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64d.lib
+        copy build_output\x64\ZlibStatDebug\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64d.lib
 
     # Passo 6: Upload dos arquivos gerados
     - name: Upload static libs
