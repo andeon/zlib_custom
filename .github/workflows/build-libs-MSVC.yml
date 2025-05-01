@@ -29,24 +29,24 @@ jobs:
         msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
         msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
 
-    # Passo 4: Build Release Static Lib (/MD) com geração de debug
-    - name: Build Release Static Lib (/MD) com debug
+    # Passo 4: Build Release Static Lib (/MT) sem geração de debug
+    - name: Build Release Static Lib (/MT) sem debug
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDLL /p:GenerateDebugInformation=true /p:DebugSymbols=true
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreaded /p:GenerateDebugInformation=false
         if not exist x64\ZlibStatRelease\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
         )
         copy x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
-    # Passo 5: Build Debug Static Lib (/MDd) com geração de debug
-    - name: Build Debug Static Lib (/MDd) com debug
+    # Passo 5: Build Debug Static Lib (/MTd) sem geração de debug
+    - name: Build Debug Static Lib (/MTd) sem debug
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebugDLL /p:GenerateDebugInformation=true /p:DebugSymbols=true
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebug /p:GenerateDebugInformation=false
         if not exist x64\ZlibStatDebug\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
@@ -57,7 +57,7 @@ jobs:
     - name: Upload static libs
       uses: actions/upload-artifact@v4
       with:
-        name: zlib-static-libs-md
+        name: zlib-static-libs-mt
         path: |
           zlib-1.2.13_2019_64.lib
           zlib-1.2.13_2019_64d.lib
