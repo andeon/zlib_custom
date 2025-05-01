@@ -34,7 +34,7 @@ jobs:
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:EnableOptimizations=true /p:GenerateDebugInformation=false /p:DebugSymbols=false
         if not exist x64\ZlibStatRelease\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
@@ -46,7 +46,7 @@ jobs:
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:EnableOptimizations=false /p:GenerateDebugInformation=true /p:DebugSymbols=true
         if not exist x64\ZlibStatDebug\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
