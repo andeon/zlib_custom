@@ -30,7 +30,8 @@ jobs:
 
     - name: Build Debug Static Lib (/MDd) sem .PDB
       shell: cmd
-      working-directory: contrib\prj
+      working-directory: prj
+      run: |
         msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebugDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false
         if not exist x64\Debug\zlib.lib (
           echo ERROR: zlib.lib not found!
