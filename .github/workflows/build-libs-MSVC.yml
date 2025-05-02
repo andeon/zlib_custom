@@ -29,24 +29,24 @@ jobs:
         msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142
         msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142
 
-    # Passo 4: Build Release Static Lib (/MT) sem geração de debug
-    - name: Build Release Static Lib (/MT) sem debug
+    # Passo 4: Build Release Static Lib (/MD) sem geração de .PDB
+    - name: Build Release Static Lib (/MD) sem .PDB
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreaded /p:GenerateDebugInformation=false
+        msbuild zlibvc.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false
         if not exist x64\ZlibStatRelease\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
         )
         copy x64\ZlibStatRelease\zlibstat.lib ..\..\..\zlib-1.2.13_2019_64.lib
 
-    # Passo 5: Build Debug Static Lib (/MTd) sem geração de debug
-    - name: Build Debug Static Lib (/MTd) sem debug
+    # Passo 5: Build Debug Static Lib (/MDd) sem .PDB
+    - name: Build Debug Static Lib (/MDd) sem .PDB
       shell: cmd
       working-directory: contrib\vstudio\vc14
       run: |
-        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebug /p:GenerateDebugInformation=false
+        msbuild zlibvc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebugDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false
         if not exist x64\ZlibStatDebug\zlibstat.lib (
           echo ERROR: zlibstat.lib not found!
           exit 1
@@ -57,7 +57,7 @@ jobs:
     - name: Upload static libs
       uses: actions/upload-artifact@v4
       with:
-        name: zlib-static-libs-mt
+        name: zlib-static-libs-md
         path: |
           zlib-1.2.13_2019_64.lib
           zlib-1.2.13_2019_64d.lib
