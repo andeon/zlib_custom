@@ -17,7 +17,7 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Build Release Static Lib (/MD) without .PDB
+    - name: Build Release Static Lib (/MD) without generating .pdb
       shell: cmd
       working-directory: contrib\prj
       run: |
@@ -28,7 +28,7 @@ jobs:
         )
         copy x64\Release\zlib.lib ..\..\zlib-1.2.13_2019_64.lib
 
-    - name: Build Debug Static Lib (/MDd) without .PDB
+    - name: Build Debug Static Lib (/MDd) without generating .pdb
       shell: cmd
       working-directory: contrib\prj
       run: |
