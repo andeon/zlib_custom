@@ -17,22 +17,22 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Build Release Static Lib (/MD) without generating .pdb
+    - name: Build Release Static Lib (/MD)
       shell: cmd
       working-directory: contrib\prj
       run: |
-        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false/p:AdditionalLinkOptions="/LTCG"
+        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDLL /p:WholeProgramOptimization=true /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false
         if not exist x64\Release\zlib.lib (
           echo ERROR: zlib.lib not found!
           exit 1
         )
         copy x64\Release\zlib.lib ..\..\zlib-1.2.13_2019_64.lib
 
-    - name: Build Debug Static Lib (/MDd) without generating .pdb
+    - name: Build Debug Static Lib (/MDd)
       shell: cmd
       working-directory: contrib\prj
       run: |
-        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebugDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false/p:AdditionalLinkOptions="/LTCG"
+        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebugDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false
         if not exist x64\Debug\zlib.lib (
           echo ERROR: zlib.lib not found!
           exit 1
