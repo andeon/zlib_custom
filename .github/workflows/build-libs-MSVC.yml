@@ -21,7 +21,7 @@ jobs:
       shell: cmd
       working-directory: contrib\prj
       run: |
-        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false
+        msbuild zlib.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false/p:AdditionalLinkOptions="/LTCG"
         if not exist x64\Release\zlib.lib (
           echo ERROR: zlib.lib not found!
           exit 1
@@ -32,7 +32,7 @@ jobs:
       shell: cmd
       working-directory: contrib\prj
       run: |
-        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebugDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false
+        msbuild zlib.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v142 /p:RuntimeLibrary=MultiThreadedDebugDLL /p:GenerateDebugInformation=false /p:DebugSymbols=false /p:LinkIncremental=false/p:AdditionalLinkOptions="/LTCG"
         if not exist x64\Debug\zlib.lib (
           echo ERROR: zlib.lib not found!
           exit 1
